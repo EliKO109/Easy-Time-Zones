@@ -101,15 +101,15 @@ struct MenuBarContentView: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button(action: { 
-                    appState.autoDetectLocation.toggle()
-                }) {
-                    Image(systemName: appState.autoDetectLocation ? "location.fill" : "location")
-                        .font(.caption)
-                        .foregroundStyle(appState.autoDetectLocation ? appState.accentColor : .secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Auto-detect Home Location")
+                Image(systemName: appState.autoDetectLocation ? "location.fill" : "location")
+                    .font(.caption)
+                    .foregroundStyle(appState.autoDetectLocation ? appState.accentColor : .secondary)
+                    .padding(4)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        appState.autoDetectLocation.toggle()
+                    }
+                    .help("Auto-detect Home Location")
             }
             .padding(.horizontal, 4)
 
@@ -425,11 +425,11 @@ struct MenuBarContentView: View {
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(location.name)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(isSelected ? appState.accentColor : .primary)
+                        .font(.body.weight(isSelected ? .bold : .medium))
+                        .foregroundStyle(isSelected ? (appState.accentColorHex == "SYSTEM" ? .blue : appState.accentColor) : .primary)
                     Text(location.timeZoneID)
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : .tertiary)
                 }
 
                 Spacer()
@@ -439,15 +439,15 @@ struct MenuBarContentView: View {
                         from: displayDate,
                         timeZone: location.timeZone,
                         is24Hour: appState.use24HourFormat))
-                        .font(.body.monospacedDigit())
-                        .foregroundStyle(isSelected ? appState.accentColor : .primary)
+                        .font(.body.monospacedDigit().weight(isSelected ? .bold : .regular))
+                        .foregroundStyle(isSelected ? (appState.accentColorHex == "SYSTEM" ? .blue : appState.accentColor) : .primary)
 
                     Text(offsetDifferenceText(
                         for: location.timeZone,
                         reference: appState.homeTimeZone,
                         now: displayDate))
                         .font(.system(size: 10).monospacedDigit())
-                        .foregroundStyle(isSelected ? appState.accentColor.opacity(0.8) : .secondary)
+                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : .secondary)
                 }
                 .padding(.trailing, isSelected ? 8 : 0)
 
