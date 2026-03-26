@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
@@ -8,48 +9,235 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Home Location") {
-                TextField("Display name", text: $draftHomeName)
-                TextField("Time zone ID", text: $draftHomeTimeZoneID)
+            Section {
+                headerView
+            }
 
+            Section("Smart Home") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle(isOn: $appState.autoDetectLocation) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Auto-detect Location")
+                                .font(.body.weight(.medium))
+                            Text("Use Location Services to update your home city automatically.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .toggleStyle(.switch)
+                    
+                    if appState.autoDetectLocation {
+                        HStack {
+                            Image(systemName: "location.fill")
+                                .font(.caption2)
+                                .foregroundStyle(appState.accentColor)
+                            Text("Currently at: **\(appState.homeName)**")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.leading, 2)
+                        .transition(.opacity)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section("Manual Home Location") {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        TextField("Search for your home city…", text: $draftHomeName)
+                            .textFieldStyle(.roundedBorder)
+                            .disabled(appState.autoDetectLocation)
+                            .onChange(of: draftHomeName) { _, newValue in
+                                if !appState.autoDetectLocation {
+                                    appState.updateSearchQuery(newValue)
+                                }
+                            }
+                        
+                        // Autocomplete suggestions for Home City
+                        if !appState.autoDetectLocation && !appState.searchSuggestions.isEmpty && !draftHomeName.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(appState.searchSuggestions.prefix(3), id: \.self) { suggestion in
+                                    Button {
+                                        selectHomeFromSuggestion(suggestion)
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(suggestion.title)
+                                                .font(.subheadline)
+                                            if !suggestion.subtitle.isEmpty {
+                                                Text(suggestion.subtitle)
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 10)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    .background(HoverBackground())
+                                    
+                                    Divider().padding(.horizontal, 10)
+                                }
+                            }
+                            .background(Color(NSColor.controlBackgroundColor))
+                            .cornerRadius(6)
+                            .shadow(radius: 2)
+                            .padding(.top, 4)
+                        }
+                    }
+
+                    TextField("Time Zone ID (e.g. Europe/London)", text: $draftHomeTimeZoneID)
+                        .textFieldStyle(.roundedBorder)
+                        .disabled(true) // Always derived from city search for best results
+                        .overlay(alignment: .trailing) {
+                            if appState.isSearching {
+                                ProgressView().controlSize(.small).scaleEffect(0.6).padding(.trailing, 8)
+                            }
+                        }
+                    
+                    HStack {
+                        Button("Apply Home Location") {
+                            saveHomeLocation()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.regular)
+                        .disabled(appState.autoDetectLocation || draftHomeTimeZoneID.isEmpty)
+
+                        if let validationMessage {
+                            Text(validationMessage)
+                                .font(.caption)
+                                .foregroundStyle(validationMessage == "Saved." ? .green : .orange)
+                                .padding(.leading, 8)
+                        }
+                    }
+                    
+                    if appState.autoDetectLocation {
+                        Text("Manual override is disabled when auto-detection is active.")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+
+            Section("General") {
+                Toggle("Launch at Login", isOn: $appState.isLaunchAtLoginEnabled)
+            }
+
+            Section("Appearance") {
                 HStack {
-                    Button("Save") {
-                        saveHomeLocation()
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    if let validationMessage {
-                        Text(validationMessage)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    Text("Accent Color")
+                    Spacer()
+                    
+                    HStack(spacing: 8) {
+                        ColorCircle(color: .accentColor, isSelected: appState.accentColorHex == "SYSTEM") {
+                            appState.accentColorHex = "SYSTEM"
+                        }
+                        
+                        ColorCircle(color: .orange, isSelected: appState.accentColorHex == "FFA500") {
+                            appState.accentColorHex = "FFA500"
+                        }
+                        
+                        ColorCircle(color: .purple, isSelected: appState.accentColorHex == "800080") {
+                            appState.accentColorHex = "800080"
+                        }
+                        
+                        ColorCircle(color: .green, isSelected: appState.accentColorHex == "008000") {
+                            appState.accentColorHex = "008000"
+                        }
+                        
+                        ColorCircle(color: .red, isSelected: appState.accentColorHex == "FF0000") {
+                            appState.accentColorHex = "FF0000"
+                        }
                     }
                 }
+            }
 
-                Text("Default: San Antonio, Texas / America/Chicago")
-                    .font(.caption)
+            Section("Menu Bar Display") {
+                Picker("Show alternate time", selection: $appState.menuBarTimeZoneID) {
+                    Text("Icon Only").tag(String?.none)
+                    Divider()
+                    ForEach(appState.savedLocations) { location in
+                        Text(location.name).tag(Optional(location.timeZoneID))
+                    }
+                }
+            }
+
+            Section("Help & Examples") {
+                Text("Common Time Zone IDs:")
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
-            }
-            
-            Section("Format") {
-                Toggle("Use 24-Hour Format", isOn: $appState.use24HourFormat)
-                    .tint(Brand.primary)
-            }
-
-            Section("Common Time Zone IDs") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Israel: Asia/Jerusalem")
-                    Text("New York: America/New_York")
-                    Text("London: Europe/London")
-                    Text("Los Angeles: America/Los_Angeles")
-                    Text("Tokyo: Asia/Tokyo")
+                
+                VStack(spacing: 6) {
+                    exampleRow(city: "Israel", identifier: "Asia/Jerusalem")
+                    exampleRow(city: "New York", identifier: "America/New_York")
+                    exampleRow(city: "London", identifier: "Europe/London")
+                    exampleRow(city: "Los Angeles", identifier: "America/Los_Angeles")
+                    exampleRow(city: "Tokyo", identifier: "Asia/Tokyo")
                 }
-                .font(.caption)
+                .padding(.top, 4)
             }
         }
         .formStyle(.grouped)
+        .frame(width: 450, height: 550)
         .onAppear {
             draftHomeName = appState.homeName
             draftHomeTimeZoneID = appState.homeTimeZoneID
+        }
+    }
+
+    private var headerView: some View {
+        HStack(spacing: 16) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Easy Time Zones")
+                    .font(.title2.weight(.bold))
+                Text("Configure your home base and display preferences.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 12)
+    }
+
+    private func exampleRow(city: String, identifier: String) -> some View {
+        HStack {
+            Text(city)
+                .font(.body.weight(.medium))
+            Spacer()
+            Text(identifier)
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        }
+        .help("Click to select and copy")
+    }
+
+    private func selectHomeFromSuggestion(_ suggestion: MKLocalSearchCompletion) {
+        let searchRequest = MKLocalSearch.Request(completion: suggestion)
+        let search = MKLocalSearch(request: searchRequest)
+        
+        Task { @MainActor in
+            do {
+                let response = try await search.start()
+                if let item = response.mapItems.first, let location = item.placemark.location {
+                    // Get actual TimeZone using geocoder
+                    let geocoder = CLGeocoder()
+                    let placemarks = try await geocoder.reverseGeocodeLocation(location)
+                    if let tz = placemarks.first?.timeZone {
+                        self.draftHomeName = item.name ?? suggestion.title
+                        self.draftHomeTimeZoneID = tz.identifier
+                        self.appState.searchSuggestions = []
+                    }
+                }
+            } catch {
+                self.validationMessage = "Could not find time zone for this city."
+            }
         }
     }
 
@@ -70,5 +258,35 @@ struct SettingsView: View {
         appState.homeName = trimmedName
         appState.homeTimeZoneID = trimmedTimeZoneID
         validationMessage = "Saved."
+    }
+}
+
+struct ColorCircle: View {
+    let color: Color
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 20, height: 20)
+            .modifier(SelectionStroke(isSelected: isSelected))
+            .onTapGesture(perform: action)
+    }
+}
+
+struct SelectionStroke: ViewModifier {
+    let isSelected: Bool
+    func body(content: Content) -> some View {
+        if isSelected {
+            content
+                .overlay(
+                    Circle()
+                        .stroke(Color.primary.opacity(0.4), lineWidth: 2)
+                        .padding(-4)
+                )
+        } else {
+            content
+        }
     }
 }

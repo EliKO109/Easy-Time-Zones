@@ -1,14 +1,59 @@
 import SwiftUI
 
 enum Brand {
-    static let primary = Color(hex: "#FF0035")
-    static let background = Color(hex: "#0E131F")
-    static let mutedWhite = Color.white.opacity(0.5)
+    static let primary = Color.accentColor
+    static let secondary = Color(NSColor.secondaryLabelColor)
+    static let background = Color(NSColor.windowBackgroundColor)
+    static let panel = Color(NSColor.controlBackgroundColor).opacity(0.92)
+    static let panelBorder = Color.black.opacity(0.08)
+    static let separator = Color(NSColor.separatorColor).opacity(0.65)
+    static let rowHighlight = Color.accentColor.opacity(0.12)
+    static let rowPressed = Color.accentColor.opacity(0.18)
+    static let softText = Color.secondary
+    static let success = Color.green
+    static let warning = Color.orange
 
     enum Typography {
-        static let heading = Font.system(.headline, design: .rounded)
-        static let body = Font.system(.body, design: .rounded)
-        static let caption = Font.system(.caption, design: .rounded)
+        static let hero = Font.system(size: 28, weight: .bold, design: .default)
+        static let heading = Font.headline
+        static let body = Font.body
+        static let caption = Font.caption
+        static let mono = Font.body.monospacedDigit()
+    }
+
+    static let accentGradient = LinearGradient(
+        colors: [primary.opacity(0.95), secondary.opacity(0.7)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let inputBackground = Color(NSColor.textBackgroundColor).opacity(0.95)
+    static let inputBorder = Color.black.opacity(0.08)
+}
+
+struct CardSurface: ViewModifier {
+    var cornerRadius: CGFloat = 16
+
+    func body(content: Content) -> some View {
+        content
+            .background(Brand.panel, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Brand.panelBorder, lineWidth: 1)
+            )
+    }
+}
+
+struct InputSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Brand.inputBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Brand.inputBorder, lineWidth: 1)
+            )
     }
 }
 
@@ -42,17 +87,42 @@ extension Color {
 struct GlassBackground: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .background(.ultraThinMaterial)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-            )
+            .liquidPanel()
     }
 }
 
 extension View {
     func glassBackground() -> some View {
         modifier(GlassBackground())
+    }
+
+    func cardSurface(cornerRadius: CGFloat = 22) -> some View {
+        modifier(CardSurface(cornerRadius: cornerRadius))
+    }
+
+    func inputSurface() -> some View {
+        modifier(InputSurface())
+    }
+
+    @ViewBuilder
+    func liquidPanel(cornerRadius: CGFloat = 28) -> some View {
+        self
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.14), Color.white.opacity(0.03)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .blendMode(.plusLighter)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Brand.panelBorder, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 16, y: 8)
     }
 }

@@ -2,14 +2,20 @@ import SwiftUI
 
 struct MenuBarLabelView: View {
     @EnvironmentObject private var appState: AppState
-
+    
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 60)) { timeline in
-            Label(
-                TimeFormatter.shortTimeString(from: timeline.date, timeZone: appState.homeTimeZone, is24Hour: appState.use24HourFormat),
-                systemImage: "clock.fill"
-            )
-            .foregroundStyle(Brand.primary)
+        HStack(spacing: 5) {
+            Image(systemName: "globe")
+            
+            if let menuBarTzID = appState.menuBarTimeZoneID,
+               let tz = TimeZone(identifier: menuBarTzID) {
+                Text(TimeFormatter.shortTimeString(
+                    from: Date(),
+                    timeZone: tz,
+                    is24Hour: appState.use24HourFormat
+                ))
+                .font(.system(size: 13, weight: .medium).monospacedDigit())
+            }
         }
     }
 }
