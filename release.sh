@@ -54,7 +54,9 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-TAG="v${VERSION}"
+  TAG="v${VERSION}"
+fi
+
 DMG_NAME="EasyTimeZones-${VERSION}.dmg"
 APP_NAME="Easy Time Zones"
 
@@ -63,7 +65,15 @@ echo "🚀  Easy Time Zones – Release Automation"
 echo "──────────────────────────────────────────"
 echo "    Version:  ${VERSION}"
 echo "    Tag:      ${TAG}"
-echo "    DMG:      ${DMG_NAME}"
+
+# ── 1.5. Bump Build Number ────────────────────────────────────────────────────
+echo "▶  Incrementing Build Number (agvtool)…"
+cd "${PROJECT_DIR}"
+xcrun agvtool next-version -all &>/dev/null || echo "⚠️  Could not auto-increment build (check Xcode build settings)."
+cd "${SCRIPT_DIR}"
+
+CURRENT_BUILD=$(grep -m1 CURRENT_PROJECT_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')
+echo "    Build:    ${CURRENT_BUILD:-N/A}"
 echo ""
 
 # ── 2. Archive ────────────────────────────────────────────────────────────────
