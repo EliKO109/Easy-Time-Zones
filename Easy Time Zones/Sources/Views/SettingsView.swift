@@ -181,10 +181,37 @@ struct SettingsView: View {
                 .padding(.top, 4)
             }
 
+            Section("About") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Easy Time Zones is a lightweight menu bar app for quick timezone conversion and remote-team planning.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Link("View project on GitHub", destination: URL(string: "https://github.com/EliKO109/Easy-Time-Zones")!)
+                        .font(.subheadline.weight(.medium))
+                }
+                .padding(.vertical, 2)
+            }
+
             Section("Support") {
-                Link(destination: URL(string: "https://buymeacoffee.com/eliko109")!) {
-                    Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
-                        .foregroundStyle(.orange)
+                VStack(alignment: .leading, spacing: 8) {
+                    Link(destination: URL(string: "https://buymeacoffee.com/eliko109")!) {
+                        Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
+                            .foregroundStyle(.orange)
+                    }
+
+                    HStack(spacing: 4) {
+                        Text("Developed by Eli Kony")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Text("·")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+
+                        Link("GitHub", destination: URL(string: "https://github.com/EliKO109/Easy-Time-Zones")!)
+                            .font(.caption.weight(.medium))
+                    }
                 }
             }
         }

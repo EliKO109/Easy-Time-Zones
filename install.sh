@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Easy Time Zones – one-liner installer
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh | bash
+#   curl -fsSLO https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh && bash install.sh
 
 set -euo pipefail
 
@@ -28,9 +28,9 @@ RELEASE_JSON=$(curl -fsSL --max-time 15 \
   -H "Cache-Control: no-cache" \
   -H "User-Agent: EasyTimeZones-Installer" \
   "https://api.github.com/repos/${REPO}/releases/latest")
-DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url":"[^"]*\.dmg"' | grep -v '\.sha256' | head -1 | cut -d'"' -f4)
-VERSION=$(echo "$RELEASE_JSON" | grep -o '"tag_name":"[^"]*"' | head -1 | cut -d'"' -f4)
-CHECKSUM_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url":"[^"]*\.sha256"' | head -1 | cut -d'"' -f4)
+VERSION=$(printf '%s' "$RELEASE_JSON" | /usr/bin/python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')
+DOWNLOAD_URL=$(printf '%s' "$RELEASE_JSON" | /usr/bin/python3 -c 'import json, sys; assets = json.load(sys.stdin)["assets"]; dmg = next((a for a in assets if a["name"].endswith(".dmg")), None); print(dmg["browser_download_url"] if dmg else "")')
+EXPECTED_SHA=$(printf '%s' "$RELEASE_JSON" | /usr/bin/python3 -c 'import json, sys; assets = json.load(sys.stdin)["assets"]; dmg = next((a for a in assets if a["name"].endswith(".dmg")), None); digest = dmg.get("digest", "") if dmg else ""; print(digest.split("sha256:", 1)[1] if digest.startswith("sha256:") else "")')
 
 if [ -z "$DOWNLOAD_URL" ]; then
   echo "❌  Could not find a .dmg asset in the latest release (${VERSION:-unknown})."
@@ -48,10 +48,9 @@ curl -L --progress-bar --max-time 120 \
   -o "$DMG_PATH" \
   "$DOWNLOAD_URL"
 
-# ── 3. Verify integrity (SHA-256 checksum) ─────────────────────────────────────
-if [ -n "$CHECKSUM_URL" ]; then
+# ── 3. Verify integrity (SHA-256 digest) ─────────────────────────────────────
+if [ -n "$EXPECTED_SHA" ]; then
   echo "▶  Verifying checksum…"
-  EXPECTED_SHA=$(curl -fsSL "$CHECKSUM_URL" | awk '{print $1}')
   ACTUAL_SHA=$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')
   if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
     echo "❌  Checksum mismatch! The download may be corrupted or tampered with."
@@ -61,7 +60,7 @@ if [ -n "$CHECKSUM_URL" ]; then
   fi
   echo "✅  Checksum verified."
 else
-  echo "⚠️   No .sha256 file found in this release — skipping integrity check."
+  echo "⚠️   No SHA-256 digest found in the GitHub release metadata — skipping integrity check."
 fi
 
 # ── 4. Mount & Install ───────────────────────────────────────────────────────
@@ -84,13 +83,21 @@ if [ -z "$MOUNT_POINT" ] || [ ! -d "$MOUNT_POINT" ]; then
 fi
 
 echo "▶  Installing to ${INSTALL_DIR}…"
-# Remove old version if present
+SOURCE_APP="${MOUNT_POINT}/${APP_NAME}.app"
+if [ ! -d "$SOURCE_APP" ]; then
+  echo "❌  Mounted DMG does not contain ${APP_NAME}.app."
+  exit 1
+fi
+
+STAGED_APP="${TMP_DIR}/${APP_NAME}.app"
+ditto "$SOURCE_APP" "$STAGED_APP"
+
 if [ -d "${INSTALL_DIR}/${APP_NAME}.app" ]; then
   echo "    Removing existing installation…"
   rm -rf "${INSTALL_DIR}/${APP_NAME}.app"
 fi
 
-cp -R "${MOUNT_POINT}/${APP_NAME}.app" "${INSTALL_DIR}/"
+ditto "$STAGED_APP" "${INSTALL_DIR}/${APP_NAME}.app"
 
 echo "▶  Cleaning up…"
 hdiutil detach "$MOUNT_POINT" -quiet || hdiutil detach "$DEV_NAME" -quiet

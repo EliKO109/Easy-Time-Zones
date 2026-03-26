@@ -27,10 +27,10 @@ A beautiful, minimal macOS menu bar app that shows the time across multiple time
 ### Option 1 – One-liner Terminal (Easiest)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh | bash
+curl -fsSLO https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh && bash install.sh
 ```
 
-The installer automatically verifies the SHA-256 checksum of the downloaded file against the `.sha256` asset published with each release.
+The installer verifies the SHA-256 digest of the downloaded DMG against the asset metadata published in the latest GitHub release.
 
 ### Option 2 – Manual Download
 

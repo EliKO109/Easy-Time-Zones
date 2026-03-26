@@ -140,6 +140,10 @@ sign_archive_for_sparkle() {
     fi
 }
 
+release_install_command() {
+    printf '%s' 'curl -fsSLO https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh && bash install.sh'
+}
+
 if ! command -v gh >/dev/null 2>&1; then
     echo "❌  GitHub CLI (gh) not found. Install it with: brew install gh"
     exit 1
@@ -184,6 +188,16 @@ SHA_FILE="${DMG_PATH}.sha256"
 DOWNLOAD_URL="${DOWNLOAD_BASE_URL}/${TAG}/${DMG_NAME}"
 RELEASE_TAG_URL="https://github.com/${REPO_SLUG}/releases/tag/${TAG}"
 PUB_DATE="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')"
+
+if git rev-parse "${TAG}" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+    echo "❌  Tag ${TAG} already exists. Choose a new version."
+    exit 1
+fi
+
+if gh release view "${TAG}" >/dev/null 2>&1; then
+    echo "❌  GitHub release ${TAG} already exists. Choose a new version."
+    exit 1
+fi
 
 echo ""
 echo "🚀  Easy Time Zones – Release Automation"
@@ -256,21 +270,11 @@ echo "✅  Sparkle length: ${SPARKLE_LENGTH}"
 echo "▶  Updating appcast.xml…"
 render_appcast
 
-echo "▶  Committing release metadata…"
-git add "${XCODEPROJ}/project.pbxproj" "${APPCAST_PATH}"
-if ! git diff --cached --quiet; then
-    git commit -m "chore: release ${VERSION}"
-fi
-
-echo "▶  Pushing branch updates…"
-git push origin main
-
 echo "▶  Pushing git tag ${TAG}…"
-git tag -a "${TAG}" -m "Release ${VERSION}" 2>/dev/null || true
-git push origin "${TAG}" 2>/dev/null || echo "ℹ️   Tag already on remote."
+git tag -a "${TAG}" -m "Release ${VERSION}"
+git push origin "${TAG}"
 
 echo "▶  Creating GitHub Release ${TAG}…"
-gh release delete "${TAG}" --yes >/dev/null 2>&1 || true
 gh release create "${TAG}" "${DMG_PATH}" "${SHA_FILE}" \
     --title "Easy Time Zones ${VERSION}" \
     --notes "## What's New in ${VERSION}
@@ -280,7 +284,7 @@ gh release create "${TAG}" "${DMG_PATH}" "${SHA_FILE}" \
 ---
 **Install via Terminal:**
 \`\`\`bash
-curl -fsSL https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh | bash
+$(release_install_command)
 \`\`\`
 
 **SHA-256 Checksum** (for manual verification):
@@ -297,6 +301,15 @@ ${SPARKLE_ED_SIGNATURE}
 
 Or download the DMG below." \
     --latest
+
+echo "▶  Committing release metadata…"
+git add "${XCODEPROJ}/project.pbxproj" "${APPCAST_PATH}"
+if ! git diff --cached --quiet; then
+    git commit -m "chore: release ${VERSION}"
+fi
+
+echo "▶  Pushing branch updates…"
+git push origin main
 
 rm -rf "${EXPORT_DIR}"
 
