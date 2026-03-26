@@ -429,7 +429,7 @@ struct MenuBarContentView: View {
                         .foregroundStyle(isSelected ? (appState.accentColorHex == "SYSTEM" ? .blue : appState.accentColor) : .primary)
                     Text(location.timeZoneID)
                         .font(.caption2)
-                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : .tertiary)
+                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : Color.secondary.opacity(0.3))
                 }
 
                 Spacer()
@@ -447,7 +447,7 @@ struct MenuBarContentView: View {
                         reference: appState.homeTimeZone,
                         now: displayDate))
                         .font(.system(size: 10).monospacedDigit())
-                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : .secondary)
+                        .foregroundStyle(isSelected ? Color.primary.opacity(0.6) : Color.secondary.opacity(0.3))
                 }
                 .padding(.trailing, isSelected ? 8 : 0)
 
