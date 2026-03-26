@@ -179,6 +179,13 @@ struct SettingsView: View {
                 }
                 .padding(.top, 4)
             }
+
+            Section("Support") {
+                Link(destination: URL(string: "https://buymeacoffee.com/eliko109")!) {
+                    Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
+                        .foregroundStyle(.orange)
+                }
+            }
         }
         .formStyle(.grouped)
         .frame(width: 450, height: 550)

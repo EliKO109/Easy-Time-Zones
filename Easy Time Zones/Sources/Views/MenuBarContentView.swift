@@ -391,6 +391,27 @@ struct MenuBarContentView: View {
             footerButton(title: "Quit", icon: "power") {
                 NSApplication.shared.terminate(nil)
             }
+
+            Divider().padding(.vertical, 4)
+
+            Button {
+                if let url = URL(string: "https://buymeacoffee.com/eliko109") {
+                    NSWorkspace.shared.open(url)
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .foregroundStyle(.orange)
+                    Text("Buy me a coffee")
+                        .font(.subheadline)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
+            .background(HoverBackground())
         }
     }
 
