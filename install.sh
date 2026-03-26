@@ -28,9 +28,9 @@ RELEASE_JSON=$(curl -fsSL --max-time 15 \
   -H "Cache-Control: no-cache" \
   -H "User-Agent: EasyTimeZones-Installer" \
   "https://api.github.com/repos/${REPO}/releases/latest")
-DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep '\.dmg' | grep -v '\.sha256' | head -1 | cut -d'"' -f4)
-VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
-CHECKSUM_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep '\.sha256' | head -1 | cut -d'"' -f4)
+DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url":"[^"]*\.dmg"' | grep -v '\.sha256' | head -1 | cut -d'"' -f4)
+VERSION=$(echo "$RELEASE_JSON" | grep -o '"tag_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+CHECKSUM_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url":"[^"]*\.sha256"' | head -1 | cut -d'"' -f4)
 
 if [ -z "$DOWNLOAD_URL" ]; then
   echo "❌  Could not find a .dmg asset in the latest release (${VERSION:-unknown})."
