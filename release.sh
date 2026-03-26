@@ -54,8 +54,7 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-  TAG="v${VERSION}"
-fi
+TAG="v${VERSION}"
 
 DMG_NAME="EasyTimeZones-${VERSION}.dmg"
 APP_NAME="Easy Time Zones"
