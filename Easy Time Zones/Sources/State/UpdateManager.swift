@@ -11,16 +11,32 @@ final class UpdateManager: ObservableObject {
     // MARK: – State
     @Published private(set) var hasUpdate = false
     @Published private(set) var latestVersion: String = ""
+    @Published private(set) var isChecking = false
+    @Published private(set) var lastCheckDate: Date? = nil
 
-    /// Current bundle short version (e.g. "1.0.0")
+    /// Current bundle display version (e.g. "1.1.0")
     var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+    }
+
+    /// Current bundle build number (e.g. "3")
+    var currentBuild: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
+    }
+
+    var versionDisplay: String {
+        "Version \(currentVersion) (Build \(currentBuild))"
     }
 
     // MARK: – Public API
     func checkForUpdates() {
         Task {
+            await MainActor.run { isChecking = true }
             await fetch()
+            await MainActor.run { 
+                isChecking = false
+                lastCheckDate = Date()
+            }
         }
     }
 

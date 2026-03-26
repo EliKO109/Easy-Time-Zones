@@ -3,6 +3,7 @@ import MapKit
 
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var updateManager: UpdateManager
     @State private var draftHomeName: String = ""
     @State private var draftHomeTimeZoneID: String = ""
     @State private var validationMessage: String?
@@ -207,6 +208,26 @@ struct SettingsView: View {
                 Text("Configure your home base and display preferences.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                
+                HStack(spacing: 8) {
+                    Text(updateManager.versionDisplay)
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                    
+                    if updateManager.isChecking {
+                        ProgressView().controlSize(.small).scaleEffect(0.5)
+                    } else {
+                        Button {
+                            updateManager.checkForUpdates()
+                        } label: {
+                            Text("Check for updates")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(appState.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.top, 2)
             }
         }
         .padding(.vertical, 12)
