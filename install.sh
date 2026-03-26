@@ -13,6 +13,10 @@ TMP_DIR=$(mktemp -d)
 # Cleanup temp dir on exit (success or failure)
 trap 'rm -rf "$TMP_DIR"' EXIT
 
+# ── 0. Pre-install checks ───────────────────────────────────────────────────
+echo "▶  Ensuring app is stopped…"
+pkill -x "Easy Time Zones" || true
+
 echo ""
 echo "🕐  Easy Time Zones – Installer"
 echo "────────────────────────────────"
@@ -21,6 +25,8 @@ echo "────────────────────────�
 echo "▶  Fetching latest release info from GitHub…"
 RELEASE_JSON=$(curl -fsSL --max-time 15 \
   -H "Accept: application/vnd.github+json" \
+  -H "Cache-Control: no-cache" \
+  -H "User-Agent: EasyTimeZones-Installer" \
   "https://api.github.com/repos/${REPO}/releases/latest")
 DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep '\.dmg' | grep -v '\.sha256' | head -1 | cut -d'"' -f4)
 VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
