@@ -6,8 +6,28 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F579A5C12FF3D480004626E2 /* Sparkle.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F579A5BF2FF3D480004626E2 /* Sparkle.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F579A5C02FF3D480004626E2 /* Sparkle.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F579A5BF2FF3D480004626E2 /* Sparkle.xcframework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F579A5C22FF3D480004626E2 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F579A5C12FF3D480004626E2 /* Sparkle.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		F5C69BEA2F74649800DB39E2 /* Easy Time Zones.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Easy Time Zones.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F579A5BF2FF3D480004626E2 /* Sparkle.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Sparkle/Sparkle.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F579A5C02FF3D480004626E2 /* Sparkle.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				F5C69BEC2F74649800DB39E2 /* Easy Time Zones */,
+				F579A5BE2FF3D480004626E2 /* Vendor */,
 				F5C69BEB2F74649800DB39E2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,6 +67,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F579A5BE2FF3D480004626E2 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				F579A5BF2FF3D480004626E2 /* Sparkle.xcframework */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -54,6 +84,7 @@
 			buildPhases = (
 				F5C69BE62F74649800DB39E2 /* Sources */,
 				F5C69BE72F74649800DB39E2 /* Frameworks */,
+				F579A5C22FF3D480004626E2 /* Embed Frameworks */,
 				F5C69BE82F74649800DB39E2 /* Resources */,
 			);
 			buildRules = (
@@ -253,9 +284,8 @@
 				ENABLE_OUTGOING_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_LSUIElement = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "EasyTimeZones-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -275,6 +305,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
+				SPARKLE_PUBLIC_ED_KEY = "mngGcxGAUZYgrnn97duWpeNR8lWDf4BoCaClW6WXQIY=";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -301,9 +332,8 @@
 				ENABLE_OUTGOING_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_LSUIElement = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "EasyTimeZones-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -323,6 +353,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
+				SPARKLE_PUBLIC_ED_KEY = "mngGcxGAUZYgrnn97duWpeNR8lWDf4BoCaClW6WXQIY=";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

@@ -213,40 +213,12 @@ struct SettingsView: View {
                     Text(updateManager.versionDisplay)
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundStyle(.secondary)
-                    
-                    if updateManager.isChecking {
-                        HStack(spacing: 8) {
-                            ProgressView().controlSize(.small).scaleEffect(0.5)
-                            Text("Checking...")
-                                .font(.system(size: 10))
-                                .foregroundStyle(.secondary)
-                        }
-                    } else {
-                        HStack(spacing: 8) {
-                            Button {
-                                updateManager.checkForUpdates()
-                            } label: {
-                                Text("Check for updates")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(appState.accentColor)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            if let error = updateManager.errorMessage {
-                                Text(error)
-                                    .font(.system(size: 9))
-                                    .foregroundStyle(.red.opacity(0.8))
-                            } else if updateManager.hasUpdate {
-                                Text("New version available!")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.orange)
-                            } else if updateManager.lastCheckDate != nil {
-                                Text("Up to date")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+
+                    Button("Check for Updates…") {
+                        updateManager.checkForUpdates()
                     }
+                    .font(.system(size: 10, weight: .bold))
+                    .disabled(!updateManager.canCheckForUpdates)
                 }
                 .padding(.top, 2)
             }

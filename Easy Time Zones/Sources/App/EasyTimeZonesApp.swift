@@ -11,11 +11,6 @@ struct EasyTimeZonesApp: App {
                 .environmentObject(appState)
                 .environmentObject(updateManager)
                 .fixedSize(horizontal: true, vertical: true)
-                .task {
-                    // Check for updates 2 seconds after the menu appears
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    updateManager.checkForUpdates()
-                }
 
         } label: {
             MenuBarLabelView()

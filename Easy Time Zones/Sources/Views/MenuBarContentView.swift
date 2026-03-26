@@ -350,30 +350,21 @@ struct MenuBarContentView: View {
 
     private var footerActions: some View {
         VStack(spacing: 0) {
-
-            if updateManager.hasUpdate {
-                Button {
-                    if let url = URL(string: UpdateManager.releasesPage) {
-                        NSWorkspace.shared.open(url)
-                    }
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(.white)
-                        Text("Update Available · \(updateManager.latestVersion)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 7)
-                    .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 6))
+            Button {
+                updateManager.checkForUpdates()
+            } label: {
+                HStack {
+                    Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.subheadline)
+                    Spacer()
                 }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 4)
-                .padding(.bottom, 4)
+                .contentShape(Rectangle())
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
             }
+            .buttonStyle(.plain)
+            .background(HoverBackground())
+            .disabled(!updateManager.canCheckForUpdates)
 
             SettingsLink {
                 HStack {
