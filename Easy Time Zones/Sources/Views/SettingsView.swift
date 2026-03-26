@@ -215,7 +215,12 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                     
                     if updateManager.isChecking {
-                        ProgressView().controlSize(.small).scaleEffect(0.5)
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small).scaleEffect(0.5)
+                            Text("Checking...")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
                         HStack(spacing: 8) {
                             Button {
@@ -231,6 +236,14 @@ struct SettingsView: View {
                                 Text(error)
                                     .font(.system(size: 9))
                                     .foregroundStyle(.red.opacity(0.8))
+                            } else if updateManager.hasUpdate {
+                                Text("New version available!")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.orange)
+                            } else if updateManager.lastCheckDate != nil {
+                                Text("Up to date")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
