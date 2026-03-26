@@ -44,11 +44,16 @@ final class UpdateManager: ObservableObject {
     private func fetch() async {
         guard let url = URL(string: Self.repoAPI) else { return }
 
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.setValue("EasyTimeZones-App", forHTTPHeaderField: "User-Agent")
 
         do {
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let httpResp = response as? HTTPURLResponse, httpResp.statusCode != 200 {
+                print("GitHub API returned status \(httpResp.statusCode)")
+                if let str = String(data: data, encoding: .utf8) { print(str) }
+            }
             if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                let tag = json["tag_name"] as? String {
                 let remote = normalised(tag)
