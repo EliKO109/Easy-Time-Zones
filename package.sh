@@ -7,7 +7,7 @@
 #
 # Output: EasyTimeZones-<version>.dmg in the current directory
 
-set -e
+set -euo pipefail
 
 APP_PATH="$1"
 APP_NAME="Easy Time Zones"
@@ -45,10 +45,15 @@ hdiutil create \
   -format UDZO \
   "$DMG_NAME"
 
-# ── 3. Clean up ───────────────────────────────────────────────────────────────
+# ── 3. Generate SHA-256 checksum ──────────────────────────────────────────────
+SHA_FILE="${DMG_NAME}.sha256"
+shasum -a 256 "$DMG_NAME" > "$SHA_FILE"
+echo "✅  Checksum: ${SHA_FILE}"
+
+# ── 4. Clean up ───────────────────────────────────────────────────────────────
 rm -rf "$TMP_DIR"
 
 echo ""
 echo "✅  Created: ${DMG_NAME}"
-echo "    Upload this file to your GitHub Release as an asset."
+echo "    Upload both ${DMG_NAME} AND ${SHA_FILE} to your GitHub Release assets."
 echo ""

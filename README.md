@@ -21,20 +21,24 @@ A beautiful, minimal macOS menu bar app that shows the time across multiple time
 
 ## 📥 Install
 
+> [!WARNING]
+> **This app is not notarized by Apple.** Always right-click → Open the first time to bypass macOS Gatekeeper. The one-liner installer script and DMG are open-source — you can review them before running.
+
 ### Option 1 – One-liner Terminal (Easiest)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh | bash
 ```
 
-> **Note:** The first time you open the app, **right-click → Open** to bypass macOS Gatekeeper (since the app is not yet notarized).
+The installer automatically verifies the SHA-256 checksum of the downloaded file against the `.sha256` asset published with each release.
 
 ### Option 2 – Manual Download
 
 1. Go to [Releases](https://github.com/EliKO109/Easy-Time-Zones/releases/latest).
-2. Download `Easy.Time.Zones.zip` (or the `.dmg`).
-3. Unzip and drag **Easy Time Zones.app** to your `/Applications` folder.
-4. Right-click → Open the first time.
+2. Download `EasyTimeZones-<version>.dmg` and the matching `.sha256` file.
+3. Verify integrity: `shasum -a 256 -c EasyTimeZones-<version>.dmg.sha256`
+4. Open the DMG and drag **Easy Time Zones.app** to your `/Applications` folder.
+5. Right-click → Open the first time.
 
 ---
 

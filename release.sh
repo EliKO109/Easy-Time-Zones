@@ -14,7 +14,7 @@
 #   - Xcode command line tools pointing to Xcode.app (not just CLT)
 #     Run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${SCRIPT_DIR}"
@@ -113,6 +113,12 @@ hdiutil create \
 rm -rf "$TMP_DIR"
 echo "✅  DMG created: ${DMG_PATH}"
 
+# ── 4b. Generate SHA-256 checksum ─────────────────────────────────────────────
+SHA_FILE="${DMG_PATH}.sha256"
+shasum -a 256 "$DMG_PATH" > "$SHA_FILE"
+DMG_SHA=$(awk '{print $1}' "$SHA_FILE")
+echo "✅  Checksum: ${DMG_SHA}"
+
 # ── 5. Git tag & push ─────────────────────────────────────────────────────────
 echo "▶  Pushing git tag ${TAG}…"
 cd "$SCRIPT_DIR"
@@ -121,9 +127,9 @@ git tag -a "${TAG}" -m "Release ${VERSION}" 2>/dev/null || {
 }
 git push origin "${TAG}" 2>/dev/null || echo "ℹ️   Tag already on remote."
 
-# ── 6. Create GitHub Release & upload DMG ────────────────────────────────────
+# ── 6. Create GitHub Release & upload DMG + checksum ─────────────────────────
 echo "▶  Creating GitHub Release ${TAG}…"
-gh release create "${TAG}" "${DMG_PATH}" \
+gh release create "${TAG}" "${DMG_PATH}" "${SHA_FILE}" \
   --title "Easy Time Zones ${VERSION}" \
   --notes "## What's New in ${VERSION}
 
@@ -134,6 +140,13 @@ gh release create "${TAG}" "${DMG_PATH}" \
 \`\`\`bash
 curl -fsSL https://raw.githubusercontent.com/EliKO109/Easy-Time-Zones/main/install.sh | bash
 \`\`\`
+
+**SHA-256 Checksum** (for manual verification):
+\`\`\`
+${DMG_SHA}
+\`\`\`
+
+> ⚠️ This app is not notarized. Right-click → Open the first time to bypass macOS Gatekeeper.
 
 Or download the DMG below." \
   --latest
