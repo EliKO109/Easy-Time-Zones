@@ -17,7 +17,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="${SCRIPT_DIR}/Easy Time Zones"
+PROJECT_DIR="${SCRIPT_DIR}"
 XCODEPROJ="${PROJECT_DIR}/Easy Time Zones.xcodeproj"
 SCHEME="Easy Time Zones"
 EXPORT_DIR="${SCRIPT_DIR}/.release_export"
