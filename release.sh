@@ -33,6 +33,20 @@ xml_escape() {
     printf '%s' "$value"
 }
 
+clean_build_setting_value() {
+    printf '%s' "$1" | sed 's/[[:space:]]*\/\/.*$//' | xargs
+}
+
+restore_info_plist_placeholders() {
+    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString \$(MARKETING_VERSION)" "${PROJECT_DIR}/EasyTimeZones-Info.plist"
+    /usr/libexec/PlistBuddy -c "Set :CFBundleVersion \$(CURRENT_PROJECT_VERSION)" "${PROJECT_DIR}/EasyTimeZones-Info.plist"
+}
+
+set_marketing_version() {
+    local version="$1"
+    perl -0pi -e "s/MARKETING_VERSION = [^;]+;/MARKETING_VERSION = ${version};/g" "${XCODEPROJ}/project.pbxproj"
+}
+
 find_sparkle_bin() {
     if [ -n "${SPARKLE_BIN:-}" ] && [ -d "${SPARKLE_BIN}" ]; then
         printf '%s\n' "${SPARKLE_BIN}"
@@ -153,9 +167,9 @@ fi
 
 if [ "${1:-}" != "" ]; then
     VERSION="$1"
-    xcrun agvtool new-marketing-version "${VERSION}" >/dev/null 2>&1 || true
+    set_marketing_version "${VERSION}"
 else
-    VERSION="$(grep -m1 MARKETING_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')"
+    VERSION="$(clean_build_setting_value "$(grep -m1 MARKETING_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')")"
 fi
 
 if [ -z "${VERSION}" ]; then
@@ -181,9 +195,10 @@ echo "    Feed:     ${APPCAST_URL}"
 echo "▶  Incrementing Build Number (agvtool)…"
 cd "${PROJECT_DIR}"
 xcrun agvtool next-version -all >/dev/null 2>&1 || echo "⚠️  Could not auto-increment build (check Xcode build settings)."
+restore_info_plist_placeholders
 cd "${SCRIPT_DIR}"
 
-CURRENT_BUILD="$(grep -m1 CURRENT_PROJECT_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')"
+CURRENT_BUILD="$(clean_build_setting_value "$(grep -m1 CURRENT_PROJECT_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')")"
 echo "    Build:    ${CURRENT_BUILD:-N/A}"
 echo ""
 

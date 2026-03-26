@@ -10,7 +10,7 @@
         <item>
             <title>Version 1.3.6</title>
             <link>https://github.com/EliKO109/Easy-Time-Zones/releases/tag/v1.3.6</link>
-            <sparkle:version>16 // Adjusted build number to 12</sparkle:version>
+            <sparkle:version>16</sparkle:version>
             <sparkle:shortVersionString>1.3.6</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:fullReleaseNotesLink>https://github.com/EliKO109/Easy-Time-Zones/releases</sparkle:fullReleaseNotesLink>
