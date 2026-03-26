@@ -19,7 +19,9 @@ echo "────────────────────────�
 
 # ── 1. Find latest release info ───────────────────────────────────────────────
 echo "▶  Fetching latest release info from GitHub…"
-RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
+RELEASE_JSON=$(curl -fsSL --max-time 15 \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/${REPO}/releases/latest")
 DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep '\.dmg' | grep -v '\.sha256' | head -1 | cut -d'"' -f4)
 VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
 CHECKSUM_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep '\.sha256' | head -1 | cut -d'"' -f4)
@@ -35,7 +37,10 @@ echo "    Latest version: ${VERSION}"
 # ── 2. Download ────────────────────────────────────────────────────────────────
 DMG_PATH="${TMP_DIR}/EasyTimeZones.dmg"
 echo "▶  Downloading ${VERSION}…"
-curl -fsSL -o "$DMG_PATH" "$DOWNLOAD_URL"
+curl -L --progress-bar --max-time 120 \
+  -H "Accept: application/octet-stream" \
+  -o "$DMG_PATH" \
+  "$DOWNLOAD_URL"
 
 # ── 3. Verify integrity (SHA-256 checksum) ─────────────────────────────────────
 if [ -n "$CHECKSUM_URL" ]; then
