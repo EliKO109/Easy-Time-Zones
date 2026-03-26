@@ -7,5 +7,22 @@
         <link>https://github.com/EliKO109/Easy-Time-Zones/releases</link>
         <description>Appcast feed for Easy Time Zones.</description>
         <language>en</language>
+        <item>
+            <title>Version 1.3.6</title>
+            <link>https://github.com/EliKO109/Easy-Time-Zones/releases/tag/v1.3.6</link>
+            <sparkle:version>16 // Adjusted build number to 12</sparkle:version>
+            <sparkle:shortVersionString>1.3.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:fullReleaseNotesLink>https://github.com/EliKO109/Easy-Time-Zones/releases</sparkle:fullReleaseNotesLink>
+            <pubDate>Thu, 26 Mar 2026 08:12:30 +0000</pubDate>
+            <description sparkle:format="markdown"><![CDATA[
+* Bug fixes and improvements
+            ]]></description>
+            <enclosure
+                url="https://github.com/EliKO109/Easy-Time-Zones/releases/download/v1.3.6/EasyTimeZones-1.3.6.dmg"
+                sparkle:edSignature="nwxfiBysEhnS0muWtdYuYPUuSIpuvwDhvr28Yi3DjQUsAgxJI0HIf3knda8v04hUTF5pkQGX/vkjTZC11HYaCw=="
+                length="3107713"
+                type="application/octet-stream" />
+        </item>
     </channel>
 </rss>
