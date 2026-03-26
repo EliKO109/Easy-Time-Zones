@@ -13,6 +13,7 @@ final class UpdateManager: ObservableObject {
     @Published private(set) var latestVersion: String = ""
     @Published private(set) var isChecking = false
     @Published private(set) var lastCheckDate: Date? = nil
+    @Published private(set) var errorMessage: String? = nil
 
     /// Current bundle display version (e.g. "1.1.0")
     var currentVersion: String {
@@ -50,10 +51,14 @@ final class UpdateManager: ObservableObject {
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
+            
             if let httpResp = response as? HTTPURLResponse, httpResp.statusCode != 200 {
-                print("GitHub API returned status \(httpResp.statusCode)")
-                if let str = String(data: data, encoding: .utf8) { print(str) }
+                let msg = "GitHub API Error \(httpResp.statusCode)"
+                print(msg)
+                await MainActor.run { errorMessage = msg }
+                return
             }
+            
             if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                let tag = json["tag_name"] as? String {
                 let remote = normalised(tag)
@@ -63,10 +68,14 @@ final class UpdateManager: ObservableObject {
                 await MainActor.run {
                     latestVersion = remote
                     hasUpdate = newer
+                    errorMessage = nil
                 }
+            } else {
+                await MainActor.run { errorMessage = "Invalid JSON response" }
             }
         } catch {
-            // Silently fail – network or parse error shouldn't crash the app.
+            let msg = "Network Error: \(error.localizedDescription)"
+            await MainActor.run { errorMessage = msg }
         }
     }
 

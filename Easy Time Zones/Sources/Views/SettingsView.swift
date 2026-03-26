@@ -217,14 +217,22 @@ struct SettingsView: View {
                     if updateManager.isChecking {
                         ProgressView().controlSize(.small).scaleEffect(0.5)
                     } else {
-                        Button {
-                            updateManager.checkForUpdates()
-                        } label: {
-                            Text("Check for updates")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(appState.accentColor)
+                        HStack(spacing: 8) {
+                            Button {
+                                updateManager.checkForUpdates()
+                            } label: {
+                                Text("Check for updates")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(appState.accentColor)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            if let error = updateManager.errorMessage {
+                                Text(error)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.red.opacity(0.8))
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.top, 2)
