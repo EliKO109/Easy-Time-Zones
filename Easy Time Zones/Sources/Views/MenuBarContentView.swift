@@ -3,6 +3,7 @@ import MapKit
 
 struct MenuBarContentView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var updateManager: UpdateManager
     @State private var sliderValue: Double = 0
     @State private var localManualTime: String = ""
     @FocusState private var isFieldFocused: Bool
@@ -349,6 +350,31 @@ struct MenuBarContentView: View {
 
     private var footerActions: some View {
         VStack(spacing: 0) {
+
+            if updateManager.hasUpdate {
+                Button {
+                    if let url = URL(string: UpdateManager.releasesPage) {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.white)
+                        Text("Update Available · \(updateManager.latestVersion)")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                        Spacer()
+                    }
+                    .contentShape(Rectangle())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 7)
+                    .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 6))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 4)
+                .padding(.bottom, 4)
+            }
+
             SettingsLink {
                 HStack {
                     Label("Settings…", systemImage: "gearshape")
