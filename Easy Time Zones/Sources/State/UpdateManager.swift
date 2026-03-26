@@ -1,7 +1,7 @@
 import Foundation
+import Combine
 
 /// Checks GitHub for a newer release and publishes `hasUpdate`.
-@MainActor
 final class UpdateManager: ObservableObject {
 
     // MARK: – Config
@@ -35,10 +35,14 @@ final class UpdateManager: ObservableObject {
             let (data, _) = try await URLSession.shared.data(for: request)
             if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                let tag = json["tag_name"] as? String {
-                let remote = normalised(tag)       // e.g. "1.2.0"
+                let remote = normalised(tag)
                 let local  = normalised(currentVersion)
-                latestVersion = remote
-                hasUpdate = isNewer(remote, than: local)
+                let newer  = isNewer(remote, than: local)
+                // Update @Published properties on the main thread
+                await MainActor.run {
+                    latestVersion = remote
+                    hasUpdate = newer
+                }
             }
         } catch {
             // Silently fail – network or parse error shouldn't crash the app.
