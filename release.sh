@@ -104,6 +104,29 @@ ${release_notes}
 EOF
 }
 
+commit_release_metadata() {
+    local current_branch
+    current_branch="$(git branch --show-current)"
+
+    if [ -z "${current_branch}" ]; then
+        echo "❌  Could not determine the current git branch."
+        exit 1
+    fi
+
+    git add "${XCODEPROJ}/project.pbxproj" "${APPCAST_PATH}" "${SHA_FILE}"
+
+    if git diff --cached --quiet --exit-code; then
+        echo "▶  Release metadata already committed on ${current_branch}."
+        return 0
+    fi
+
+    echo "▶  Committing release metadata…"
+    git commit -m "Release ${VERSION}"
+
+    echo "▶  Pushing ${current_branch} to origin…"
+    git push origin "${current_branch}"
+}
+
 sign_archive_for_sparkle() {
     if [ -n "${GENERATE_APPCAST_BIN:-}" ] && [ -x "${GENERATE_APPCAST_BIN}" ]; then
         local temp_updates_dir generated_appcast
@@ -239,15 +262,23 @@ if [ ! -d "${APP_PATH}" ]; then
 fi
 
 COPIED_APP="${EXPORT_DIR}/${APP_NAME}.app"
-cp -R "${APP_PATH}" "${COPIED_APP}"
+# Use ditto for bundles to preserve metadata
+ditto "${APP_PATH}" "${COPIED_APP}"
 echo "✅  Exported: ${COPIED_APP}"
 
 echo "▶  Creating DMG…"
 TMP_DIR="$(mktemp -d)"
 STAGING="${TMP_DIR}/${APP_NAME}"
 mkdir -p "${STAGING}"
-cp -R "${COPIED_APP}" "${STAGING}/"
+# Use ditto to preserve metadata and bundle bit
+ditto "${COPIED_APP}" "${STAGING}/${APP_NAME}.app"
 ln -s /Applications "${STAGING}/Applications"
+
+# Ensure the main binary is executable and touch the bundle
+echo "▶  Ensuring bundle integrity…"
+BINARY_NAME=$(defaults read "${STAGING}/${APP_NAME}.app/Contents/Info" CFBundleExecutable 2>/dev/null || echo "${APP_NAME}")
+chmod +x "${STAGING}/${APP_NAME}.app/Contents/MacOS/${BINARY_NAME}"
+touch "${STAGING}/${APP_NAME}.app"
 
 hdiutil create \
     -volname "${APP_NAME}" \
@@ -269,6 +300,8 @@ echo "✅  Sparkle length: ${SPARKLE_LENGTH}"
 
 echo "▶  Updating appcast.xml…"
 render_appcast
+
+commit_release_metadata
 
 echo "▶  Pushing git tag ${TAG}…"
 git tag -a "${TAG}" -m "Release ${VERSION}"

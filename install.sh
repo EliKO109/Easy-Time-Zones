@@ -98,6 +98,9 @@ if [ -d "${INSTALL_DIR}/${APP_NAME}.app" ]; then
 fi
 
 ditto "$STAGED_APP" "${INSTALL_DIR}/${APP_NAME}.app"
+EXECUTABLE_NAME=$(defaults read "${INSTALL_DIR}/${APP_NAME}.app/Contents/Info" CFBundleExecutable 2>/dev/null || echo "$APP_NAME")
+chmod +x "${INSTALL_DIR}/${APP_NAME}.app/Contents/MacOS/${EXECUTABLE_NAME}"
+touch "${INSTALL_DIR}/${APP_NAME}.app"
 
 echo "▶  Cleaning up…"
 hdiutil detach "$MOUNT_POINT" -quiet || hdiutil detach "$DEV_NAME" -quiet

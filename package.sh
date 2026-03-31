@@ -33,8 +33,17 @@ echo ""
 
 # ── 1. Create staging folder ──────────────────────────────────────────────────
 mkdir -p "$STAGING"
-cp -R "$APP_PATH" "$STAGING/"
+# Use ditto to preserve macOS metadata and the bundle bit
+ditto "$APP_PATH" "${STAGING}/${APP_NAME}.app"
 ln -s /Applications "${STAGING}/Applications"
+
+# ── 2. Ensure bundle validity ────────────────────────────────────────────────
+echo "▶  Ensuring bundle integrity…"
+# Ensure the main binary is executable
+EXECUTABLE_NAME=$(defaults read "${STAGING}/${APP_NAME}.app/Contents/Info" CFBundleExecutable 2>/dev/null || echo "$APP_NAME")
+chmod +x "${STAGING}/${APP_NAME}.app/Contents/MacOS/${EXECUTABLE_NAME}"
+# Touch the bundle to force Finder/macOS to re-evaluate it as a package
+touch "${STAGING}/${APP_NAME}.app"
 
 # ── 2. Create the DMG ─────────────────────────────────────────────────────────
 echo "▶  Building DMG…"
