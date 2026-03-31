@@ -18,12 +18,14 @@ SCHEME="Easy Time Zones"
 EXPORT_DIR="${SCRIPT_DIR}/.release_export"
 ARCHIVE_PATH="${EXPORT_DIR}/archive.xcarchive"
 APPCAST_PATH="${SCRIPT_DIR}/appcast.xml"
+INFO_PLIST_PATH="${PROJECT_DIR}/EasyTimeZones-Info.plist"
 APP_NAME="Easy Time Zones"
 REPO_SLUG="EliKO109/Easy-Time-Zones"
 RELEASES_PAGE="https://github.com/${REPO_SLUG}/releases"
 APPCAST_URL="https://raw.githubusercontent.com/${REPO_SLUG}/main/appcast.xml"
 DOWNLOAD_BASE_URL="https://github.com/${REPO_SLUG}/releases/download"
 MIN_SYSTEM_VERSION="14.0"
+INFO_PLIST_BACKUP=""
 
 xml_escape() {
     local value="$1"
@@ -37,9 +39,17 @@ clean_build_setting_value() {
     printf '%s' "$1" | sed 's/[[:space:]]*\/\/.*$//' | xargs
 }
 
-restore_info_plist_placeholders() {
-    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString \$(MARKETING_VERSION)" "${PROJECT_DIR}/EasyTimeZones-Info.plist"
-    /usr/libexec/PlistBuddy -c "Set :CFBundleVersion \$(CURRENT_PROJECT_VERSION)" "${PROJECT_DIR}/EasyTimeZones-Info.plist"
+backup_info_plist() {
+    INFO_PLIST_BACKUP="$(mktemp)"
+    cp "${INFO_PLIST_PATH}" "${INFO_PLIST_BACKUP}"
+}
+
+restore_info_plist() {
+    if [ -n "${INFO_PLIST_BACKUP}" ] && [ -f "${INFO_PLIST_BACKUP}" ]; then
+        cp "${INFO_PLIST_BACKUP}" "${INFO_PLIST_PATH}"
+        rm -f "${INFO_PLIST_BACKUP}"
+        INFO_PLIST_BACKUP=""
+    fi
 }
 
 set_marketing_version() {
@@ -231,8 +241,9 @@ echo "    Feed:     ${APPCAST_URL}"
 
 echo "▶  Incrementing Build Number (agvtool)…"
 cd "${PROJECT_DIR}"
+backup_info_plist
 xcrun agvtool next-version -all >/dev/null 2>&1 || echo "⚠️  Could not auto-increment build (check Xcode build settings)."
-restore_info_plist_placeholders
+restore_info_plist
 cd "${SCRIPT_DIR}"
 
 CURRENT_BUILD="$(clean_build_setting_value "$(grep -m1 CURRENT_PROJECT_VERSION "${XCODEPROJ}/project.pbxproj" | sed 's/.*= //;s/;//')")"
@@ -334,15 +345,6 @@ ${SPARKLE_ED_SIGNATURE}
 
 Or download the DMG below." \
     --latest
-
-echo "▶  Committing release metadata…"
-git add "${XCODEPROJ}/project.pbxproj" "${APPCAST_PATH}"
-if ! git diff --cached --quiet; then
-    git commit -m "chore: release ${VERSION}"
-fi
-
-echo "▶  Pushing branch updates…"
-git push origin main
 
 rm -rf "${EXPORT_DIR}"
 
